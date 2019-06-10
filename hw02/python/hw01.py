@@ -5,8 +5,8 @@ from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 ax = Axes3D(fig)
 
-dX = np.linspace(-10, 10, 100)
-dY = np.linspace(-10, 10, 100)
+dX = np.linspace(-5, 5, 100)
+dY = np.linspace(-5, 5, 100)
 X,Y = np.meshgrid(dX,dY)
 Z = 4/((X-2)**2+(Y-2)**2+1)+3/((X-2)**2+(Y+2)**2+1)+2/((X+2)**2+(Y-2)**2+1)
 
