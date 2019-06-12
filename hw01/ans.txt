@@ -1,0 +1,2 @@
+The biggest value for object function :
+F(1.993062, 1.989559) = 4.294743
