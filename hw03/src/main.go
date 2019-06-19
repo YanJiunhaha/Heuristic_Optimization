@@ -2,15 +2,15 @@ package main
 
 import (
     "fmt"
-    //"time"
+    "time"
     "math"
     "math/rand"
     "../../object_function"
 )
 
 const(
-    MG int = 50           // Maximal Number of Generations
-    N  int = 10           // Population Size
+    MG int = 10000           // Maximal Number of Generations
+    N  int = 50           // Population Size
     CL int = 32           // Number of bits in each chromsome
     SF float64 = 2.0      // Selection Factor
     CR float64 = 0.5      // Crossover Rate
@@ -24,10 +24,6 @@ var(
     best_c [CL]int
     best_f float64
 )
-
-func RAND() float64{
-    return rand.Float64()
-}
 
 // Decode Chromosome
 func decoder(chromosome [CL]int, x *float64, y *float64){
@@ -46,8 +42,8 @@ func decoder(chromosome [CL]int, x *float64, y *float64){
 }
 
 func main(){
-    // rand seed
-    rand.Seed(4)
+    //rand.Seed(4)
+    rand.Seed(time.Now().Unix())
     var x,y float64
 
     // Initialize Population
@@ -65,7 +61,6 @@ func main(){
         for i := 0; i < N; i++ {
             decoder(c[i], &x, &y)
             f[i] = object.Result(x, y)
-
             // Update best solution
             if f[i] > best_f {
                 best_f = f[i]
@@ -73,6 +68,7 @@ func main(){
                     best_c[j] = c[i][j]
                 }
             }
+        }
             // Selection
             // Evaluate Selection Probability
             tmpf := 0.0
@@ -91,7 +87,7 @@ func main(){
             }
             // Roulette wheel selection with replacment
             for i := 0; i < N; i++ {
-                tmpf = RAND()
+                tmpf = rand.Float64()
                 var k int
                 for k = 0; tmpf > p[k]; k++ {
                     tmpf -= p[k]
@@ -111,8 +107,8 @@ func main(){
             tmpi := 0
             var site int
             for i := 0; i < N; i += 2 {
-                if RAND() < CR {
-                    site = int(RAND() * float64(CL))
+                if rand.Float64() < CR {
+                    site = int(rand.Float64() * float64(CL))
                     for j := 0; j < site; j++{
                         tmpi = c[i][j]
                         c[i][j] = c[i + 1][j]
@@ -123,7 +119,7 @@ func main(){
             // Mutation
             for i := 0; i < N; i++ {
                 for j := 0; j < CL; j++ {
-                    if RAND() < MR {
+                    if rand.Float64() < MR {
                         c[i][j] = 1 - c[i][j]
                     }
                 }
@@ -131,6 +127,5 @@ func main(){
             fmt.Printf("%f\n", best_f)
         }
         decoder(best_c, &x, &y)
-        fmt.Printf("F(%f,%f) = %f\n", x, y ,object.Result(x, y))
-    }
+//        fmt.Printf("F(%f,%f) = %f\n", x, y ,object.Result(x, y))
 }
