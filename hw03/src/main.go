@@ -2,130 +2,49 @@ package main
 
 import (
     "fmt"
-    "time"
-    "math"
-    "math/rand"
     "../../object_function"
+    "math/rand"
+    "time"
 )
 
-const(
-    MG int = 10000           // Maximal Number of Generations
-    N  int = 50           // Population Size
-    CL int = 32           // Number of bits in each chromsome
-    SF float64 = 2.0      // Selection Factor
-    CR float64 = 0.5      // Crossover Rate
-    MR float64 = 0.05     // Mutation Rate
-)
-
-// data declare
-var(
-    c [N][CL]int
-    f [N]float64
-    best_c [CL]int
-    best_f float64
-)
-
-// Decode Chromosome
-func decoder(chromosome [CL]int, x *float64, y *float64){
-    *x = 0
-
-    for i := 0; i < CL / 2; i++ {
-        *x = (*x) * 2 + float64(chromosome[i])
+func Direct(x float64, y float64, step float64) (dx, dy, best float64) {
+    best = 0
+    for i := -1.; i <= 1.; i += 2. {
+        for j := -1.; j <= 1.; j += 2. {
+            r := object.Result(x + i * step, y + j * step)
+            if r > best {
+                best = r
+                dx = i
+                dy = j
+            }
+        }
     }
-    *x = (*x) / (1 << 16) * 10 - 5
-
-    *y = 0
-    for i := CL / 2; i < CL; i++ {
-        *y = (*y) * 2 + float64(chromosome[i])
-    }
-    *y = (*y) / (1 << 16) * 10 - 5
+    return
 }
 
-func main(){
-    //rand.Seed(4)
+func main() {
+    // rand.Seed(4)
     rand.Seed(time.Now().Unix())
-    var x,y float64
+    var x, y, value float64
+    x = rand.Float64() * 10 - 5
+    y = rand.Float64() * 10 - 5
+    value = object.Result(x,y)
 
-    // Initialize Population
-    best_f := -1.0e99
-    for i := 0; i < N; i++ {
-        // Randomly set each gene to '0' or '1'
-        for j := 0; j < CL; j++ {
-            c[i][j] = rand.Intn(2)
+    var stepSize float64 = 0.5
+
+    for stepSize > 1e-5 {
+        nx, ny, nv := Direct(x,y,stepSize)
+        if nv > value {
+            x += nx * stepSize
+            y += ny * stepSize
+            value = nv
+            stepSize *= 2
+            fmt.Println(value)
+        } else {
+          stepSize *= 0.5
         }
     }
 
-    // Repeat Genetic Algorithm cycle for MG times
-    for gen := 0; gen < MG; gen++ {
-        // Evaluation
-        for i := 0; i < N; i++ {
-            decoder(c[i], &x, &y)
-            f[i] = object.Result(x, y)
-            // Update best solution
-            if f[i] > best_f {
-                best_f = f[i]
-                for j := 0; j < CL; j++ {
-                    best_c[j] = c[i][j]
-                }
-            }
-        }
-            // Selection
-            // Evaluate Selection Probability
-            tmpf := 0.0
-            var p [N]float64
-            var tmpc [N][CL]int
-            for i := 0; i < N; i++ {
-                p[i] = math.Pow(f[i], SF)
-                tmpf += p[i]
-            }
-            for i := 0; i < N; i++ {
-                p[i] /= tmpf
-            }
-            // Retain the best Chromosome found so far
-            for i := 0; i < CL; i++ {
-                tmpc[0][i] = best_c[i]
-            }
-            // Roulette wheel selection with replacment
-            for i := 0; i < N; i++ {
-                tmpf = rand.Float64()
-                var k int
-                for k = 0; tmpf > p[k]; k++ {
-                    tmpf -= p[k]
-                }
-                // Chromosome j is selected
-                for j := 0; j < CL; j++ {
-                    tmpc[i][j] = c[k][j]
-                }
-            }
-            // Copy temporary population to population
-            for i := 0; i < N; i++ {
-                for j := 0; j < CL; j++ {
-                    c[i][j] = tmpc[i][j]
-                }
-            }
-            // 1-site Crossover
-            tmpi := 0
-            var site int
-            for i := 0; i < N; i += 2 {
-                if rand.Float64() < CR {
-                    site = int(rand.Float64() * float64(CL))
-                    for j := 0; j < site; j++{
-                        tmpi = c[i][j]
-                        c[i][j] = c[i + 1][j]
-                        c[i + 1][j] = tmpi
-                    }
-                }
-            }
-            // Mutation
-            for i := 0; i < N; i++ {
-                for j := 0; j < CL; j++ {
-                    if rand.Float64() < MR {
-                        c[i][j] = 1 - c[i][j]
-                    }
-                }
-            }
-            fmt.Printf("%f\n", best_f)
-        }
-        decoder(best_c, &x, &y)
-//        fmt.Printf("F(%f,%f) = %f\n", x, y ,object.Result(x, y))
+    fmt.Printf("F(%f, %f)=%f\n",x,y,value)
 }
+
