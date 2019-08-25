@@ -29,6 +29,7 @@ func main() {
     x = rand.Float64() * 10 - 5
     y = rand.Float64() * 10 - 5
     value = object.Result(x,y)
+    fmt.Printf("Init (x,y)=(%f,%f)\n",x,y)
 
     var stepSize float64 = 0.5
 

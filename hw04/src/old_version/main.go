@@ -5,7 +5,7 @@ import (
     "time"
     "math"
     "math/rand"
-    "../../object_function"
+    "../../../object_function"
 )
 
 const(
